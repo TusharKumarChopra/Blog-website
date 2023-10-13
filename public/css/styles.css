@@ -15,12 +15,19 @@
     color: #1abc9c !important;
 }
 
+.nav-item{
+    padding: 0px 18px;
+}
+
+.navbar-toggler{
+    margin-right: 1rem;
+}
 .footer-padding {
 	padding-bottom: 60px;
 }
 
 .footer {
-	position: absolute;
+	position: fixed;
 	text-align: center;
 	bottom: 0;
 	width: 100%;

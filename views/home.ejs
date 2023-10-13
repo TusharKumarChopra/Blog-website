@@ -4,7 +4,9 @@
 <p><%= startingContent %> </p>
 <% newPosts.forEach((post) =>  {%>  
     <h1><%= post.title  %></h1>
-    <p><%= post.bodyContent.substring(0, 100).concat('...');  %><a href="/posts/<%= post.title %>">Read More</a></p>
+    <p><%= post.bodyContent.substring(0, 100).concat('...');  %><a href="/posts/<%= post._id %>">Read More</a></p>
 <% }); %>
-    
+<a href="/compose">
+    <button class="btn btn-primary">New Entry</button>
+</a>
 <%- include("partials/footer"); -%>

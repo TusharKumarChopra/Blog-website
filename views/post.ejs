@@ -2,5 +2,7 @@
 
 <h1><%= titleContent %></h1>
 <p><%= bodyOfTitle %> </p>
-    
+<form action="/posts/<%=id%>?_method=DELETE" method="post">
+    <button type="submit" class="btn btn-primary">Delete</button>
+</form>
 <%- include("partials/footer"); -%>
