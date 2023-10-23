@@ -5,9 +5,11 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const _ = require('lodash');
 const mongoose = require('mongoose');
-const Content = require('./models/content');
+const Content = require('../models/content');
 const methodOverride = require('method-override');
 mongoose.set('strictQuery', true); 
+const serverless = require('serverless-http');
+const router = express.Router();
 main();
 async function main() {
   try {
@@ -34,7 +36,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 app.use(methodOverride('_method'))
 
-app.get("/", async function(req, res) {
+router.get("/", async function(req, res) {
   try {
     const contents = await Content.find({}).exec();
     res.render("home", { startingContent: homeStartingContent, newPosts: contents });
@@ -44,19 +46,19 @@ app.get("/", async function(req, res) {
   }
 });
 
-app.get("/about", function(req, res) {
+router.get("/about", function(req, res) {
   res.render("about", {
     aboutStartingContent: aboutContent});
 });
-app.get("/contact", function(req, res) {
+router.get("/contact", function(req, res) {
   res.render("contact", {
     contactStartingContent: contactContent});
 });
-app.get("/compose", function(req, res) {
+router.get("/compose", function(req, res) {
   res.render("compose");
 })
 
-app.post("/compose", async function (req, res) {
+router.post("/compose", async function (req, res) {
   const newPost = new Content({
     title: req.body.postTitle,
     bodyContent: req.body.postBody
@@ -73,7 +75,7 @@ app.post("/compose", async function (req, res) {
 
 
 
-app.get("/posts/:id", async function (req, res) {
+router.get("/posts/:id", async function (req, res) {
   const id = req.params.id;
 
   try {
@@ -96,7 +98,7 @@ app.get("/posts/:id", async function (req, res) {
 });
 
 
-app.delete("/posts/:id", async (req, res) => {
+router.delete("/posts/:id", async (req, res) => {
   const id = req.params.id;
   await Content.findByIdAndDelete(id);
   res.redirect("/");
@@ -108,7 +110,7 @@ app.delete("/posts/:id", async (req, res) => {
 
 
 
-
+module.exports.handler = serverless(app);
 
 
 
