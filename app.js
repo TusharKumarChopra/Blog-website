@@ -11,7 +11,7 @@ mongoose.set('strictQuery', true);
 main();
 async function main() {
   try {
-    await mongoose.connect('mongodb://127.0.0.1:27017/blog');
+    await mongoose.connect('mongodb+srv://tushar-admin:test123@cluster0.uist6g8.mongodb.net/blog');
     console.log('Connected to the mongo database successfully');
     
     // Continue with your application logic here
@@ -34,12 +34,16 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 app.use(methodOverride('_method'))
 
-app.get("/", function(req, res) {
-  Content.find({}, (err, contents) => {
-    res.render("home", {startingContent: homeStartingContent, newPosts: contents});
-  })
-
+app.get("/", async function(req, res) {
+  try {
+    const contents = await Content.find({}).exec();
+    res.render("home", { startingContent: homeStartingContent, newPosts: contents });
+  } catch (err) {
+    console.error("Error fetching content:", err);
+    // Handle the error appropriately, e.g., send an error page or a response.
+  }
 });
+
 app.get("/about", function(req, res) {
   res.render("about", {
     aboutStartingContent: aboutContent});
@@ -52,28 +56,45 @@ app.get("/compose", function(req, res) {
   res.render("compose");
 })
 
-app.post("/compose", async function(req, res) {
+app.post("/compose", async function (req, res) {
   const newPost = new Content({
     title: req.body.postTitle,
     bodyContent: req.body.postBody
   });
-  newPost.save((err) => {
-    if(!err) {
-      res.redirect("/")
-    }
-  });
+
+  try {
+    await newPost.save();
+    res.redirect("/");
+  } catch (err) {
+    console.error("Error saving the new post:", err);
+    // Handle the error appropriately, e.g., send an error page or a response.
+  }
 });
 
 
-app.get("/posts/:id", function (req, res) {
+
+app.get("/posts/:id", async function (req, res) {
   const id = req.params.id;
-    Content.findOne({_id: id},(err, newPost) =>{
-    res.render("post", {
-      titleContent: newPost.title, 
-      bodyOfTitle: newPost.bodyContent,
-      id: id});
-    })
+
+  try {
+    const newPost = await Content.findOne({ _id: id }).exec();
+
+    if (newPost) {
+      res.render("post", {
+        titleContent: newPost.title,
+        bodyOfTitle: newPost.bodyContent,
+        id: id
+      });
+    } else {
+      // Handle the case where no post with the given ID is found
+      res.status(404).send("Post not found");
+    }
+  } catch (err) {
+    console.error("Error fetching post:", err);
+    // Handle the error appropriately, e.g., send an error page or a response.
+  }
 });
+
 
 app.delete("/posts/:id", async (req, res) => {
   const id = req.params.id;
