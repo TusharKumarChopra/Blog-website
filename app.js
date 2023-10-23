@@ -5,11 +5,9 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const _ = require('lodash');
 const mongoose = require('mongoose');
-const Content = require('../models/content');
+const Content = require('./models/content');
 const methodOverride = require('method-override');
 mongoose.set('strictQuery', true); 
-const serverless = require('serverless-http');
-const router = express.Router();
 main();
 async function main() {
   try {
@@ -36,7 +34,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 app.use(methodOverride('_method'))
 
-router.get("/", async function(req, res) {
+app.get("/", async function(req, res) {
   try {
     const contents = await Content.find({}).exec();
     res.render("home", { startingContent: homeStartingContent, newPosts: contents });
@@ -46,19 +44,19 @@ router.get("/", async function(req, res) {
   }
 });
 
-router.get("/about", function(req, res) {
+app.get("/about", function(req, res) {
   res.render("about", {
     aboutStartingContent: aboutContent});
 });
-router.get("/contact", function(req, res) {
+app.get("/contact", function(req, res) {
   res.render("contact", {
     contactStartingContent: contactContent});
 });
-router.get("/compose", function(req, res) {
+app.get("/compose", function(req, res) {
   res.render("compose");
 })
 
-router.post("/compose", async function (req, res) {
+app.post("/compose", async function (req, res) {
   const newPost = new Content({
     title: req.body.postTitle,
     bodyContent: req.body.postBody
@@ -75,7 +73,7 @@ router.post("/compose", async function (req, res) {
 
 
 
-router.get("/posts/:id", async function (req, res) {
+app.get("/posts/:id", async function (req, res) {
   const id = req.params.id;
 
   try {
@@ -98,7 +96,7 @@ router.get("/posts/:id", async function (req, res) {
 });
 
 
-router.delete("/posts/:id", async (req, res) => {
+app.delete("/posts/:id", async (req, res) => {
   const id = req.params.id;
   await Content.findByIdAndDelete(id);
   res.redirect("/");
@@ -110,10 +108,10 @@ router.delete("/posts/:id", async (req, res) => {
 
 
 
-module.exports.handler = serverless(app);
 
 
 
-app.listen(3000, function() {
+
+app.listen(process.env.PORT, 3000, function() {
   console.log("Server started on port 3000");
 });
